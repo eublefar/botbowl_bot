@@ -250,11 +250,15 @@ class PPO(BaseAgent):
                                         for sample_key, sample in samples.items()
                                     }, iters
                                 )
-                                if MIXED_PREC:
-                                    self.scaler.scale(loss).backward()
+                                if loss is not None:
+                                  if MIXED_PREC:
+                                      self.scaler.scale(loss).backward()
+                                  else:
+                                      loss.backward()
                                 else:
-                                    loss.backward()
+                                  print("Skipping step due to advantages having no variance")
                                 del loss
+
                         except RuntimeError as e:
                             print("cuda in error: ", "CUDA" in str(e))
                             print("reducing batch_size") 
@@ -324,8 +328,10 @@ class PPO(BaseAgent):
                     if self.adv_std is not None
                     else adv_std
                 )
+            if(adv_std == 0):
+              return None
             advantages = (
-                ((advantages - self.adv_mean) / self.adv_std) if self.adv_std != 0 else 0
+                ((advantages - self.adv_mean) / self.adv_std) 
             )
             
             probs = (
