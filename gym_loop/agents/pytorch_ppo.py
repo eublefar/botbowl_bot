@@ -50,7 +50,7 @@ class PPO(BaseAgent):
         self.last_actions_logprobs = None
         self.adv_mean = None
         self.adv_std = None
-        self.momentum = 1
+        self.momentum = 0.125
         self.metrics_dict = {}
 
         self.uploaded = [False for i in range(self.n_envs)]
@@ -227,6 +227,7 @@ class PPO(BaseAgent):
         """Called immediately after memorize"""
         if all(self.uploaded):
             print("All uploadedd")
+            print(self.momentum)
             self.memory.batch_size = self.batch_size
             self.uploaded = [False for i in range(self.n_envs)]
             sub_batch_size = self.sub_batch_size
